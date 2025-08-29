@@ -1,0 +1,52 @@
+---
+- name: Deploy Stock Analysis Platform
+  hosts: all
+  become: yes
+  vars:
+    app_version: "latest"
+    docker_registry: "your-docker-registry.com"
+    docker_namespace: "stock-analysis"
+    app_name: "stock-analysis-platform"
+  
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+    
+    - name: Ensure Docker Compose is installed
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+    
+    - name: Create application directory
+      file:
+        path: /opt/{{ app_name }}
+        state: directory
+        mode: '0755'
+    
+    - name: Copy Docker Compose file
+      template:
+        src: templates/docker-compose.yml.j2
+        dest: /opt/{{ app_name }}/docker-compose.yml
+        mode: '0644'
+    
+    - name: Copy environment file
+      template:
+        src: templates/.env.j2
+        dest: /opt/{{ app_name }}/.env
+        mode: '0640'
+    
+    - name: Pull Docker images
+      docker_compose:
+        project_src: /opt/{{ app_name }}
+        pull: yes
+    
+    - name: Deploy application
+      docker_compose:
+        project_src: /opt/{{ app_name }}
+        state: present
+        restarted: yes
+        recreate: always

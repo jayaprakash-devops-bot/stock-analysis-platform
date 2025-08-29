@@ -1,139 +1,166 @@
+# version: '3.8'
+
+# services:
+#   # API Gateway
+#   api-gateway:
+#     build: ./api-gateway
+#     ports:
+#       - "80:8000"
+#       - "443:8443"
+#     environment:
+#       - KONG_DATABASE=off
+#       - KONG_DECLARATIVE_CONFIG=/usr/local/kong/declarative/kong.yml
+#     volumes:
+#       - ./api-gateway/kong.yml:/usr/local/kong/declarative/kong.yml
+#     networks:
+#       - stock-network
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.5'
+#           memory: 1G
+
+#   # Frontend
+#   frontend:
+#     build: ./frontend
+#     ports:
+#       - "3000:3000"
+#     networks:
+#       - stock-network
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.5'
+#           memory: 2G
+
+#   # Market Data Service
+#   market-data:
+#     build: ./market-data-service
+#     environment:
+#       - REDIS_URL=redis://redis:6379
+#       - POSTGRES_URL=postgresql://user:password@postgres:5432/market_data
+#     networks:
+#       - stock-network
+#     depends_on:
+#       - redis
+#       - postgres
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.4'
+#           memory: 3G
+
+#   # Financial Analysis Service
+#   financial-analysis:
+#     build: ./financial-analysis-service
+#     environment:
+#       - POSTGRES_URL=postgresql://user:password@postgres:5432/financial_analysis
+#     networks:
+#       - stock-network
+#     depends_on:
+#       - postgres
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.4'
+#           memory: 3G
+
+#   # AI Agent Service
+#   ai-agent:
+#     build: ./ai-agent-service
+#     environment:
+#       - MONGO_URL=mongodb://mongo:27017/ai_agent
+#     networks:
+#       - stock-network
+#     depends_on:
+#       - mongo
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.5'
+#           memory: 4G
+
+#   # PostgreSQL Database
+#   postgres:
+#     image: postgres:13
+#     environment:
+#       POSTGRES_USER: user
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: market_data
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#       - ./databases/init.sql:/docker-entrypoint-initdb.d/init.sql
+#     networks:
+#       - stock-network
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.3'
+#           memory: 4G
+
+#   # MongoDB
+#   mongo:
+#     image: mongo:5
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: admin
+#       MONGO_INITDB_ROOT_PASSWORD: password
+#     volumes:
+#       - mongo_data:/data/db
+#       - ./databases/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+#     networks:
+#       - stock-network
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.2'
+#           memory: 3G
+
+#   # Redis
+#   redis:
+#     image: redis:6-alpine
+#     command: redis-server --appendonly yes
+#     volumes:
+#       - redis_data:/data
+#     networks:
+#       - stock-network
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.2'
+#           memory: 2G
+
+# networks:
+#   stock-network:
+#     driver: bridge
+
+# volumes:
+#   postgres_data:
+#   mongo_data:
+#   redis_data:
+
 version: '3.8'
 
 services:
-  # API Gateway
-  api-gateway:
-    build: ./api-gateway
-    ports:
-      - "80:8000"
-      - "443:8443"
-    environment:
-      - KONG_DATABASE=off
-      - KONG_DECLARATIVE_CONFIG=/usr/local/kong/declarative/kong.yml
-    volumes:
-      - ./api-gateway/kong.yml:/usr/local/kong/declarative/kong.yml
-    networks:
-      - stock-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 1G
-
-  # Frontend
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    networks:
-      - stock-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 2G
-
-  # Market Data Service
-  market-data:
-    build: ./market-data-service
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - POSTGRES_URL=postgresql://user:password@postgres:5432/market_data
-    networks:
-      - stock-network
-    depends_on:
-      - redis
-      - postgres
-    deploy:
-      resources:
-        limits:
-          cpus: '0.4'
-          memory: 3G
-
-  # Financial Analysis Service
-  financial-analysis:
-    build: ./financial-analysis-service
-    environment:
-      - POSTGRES_URL=postgresql://user:password@postgres:5432/financial_analysis
-    networks:
-      - stock-network
-    depends_on:
-      - postgres
-    deploy:
-      resources:
-        limits:
-          cpus: '0.4'
-          memory: 3G
-
-  # AI Agent Service
-  ai-agent:
-    build: ./ai-agent-service
-    environment:
-      - MONGO_URL=mongodb://mongo:27017/ai_agent
-    networks:
-      - stock-network
-    depends_on:
-      - mongo
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 4G
-
-  # PostgreSQL Database
-  postgres:
+  test-db:
     image: postgres:13
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: market_data
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./databases/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - stock-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 4G
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_stockanalysis
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_stockanalysis"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # MongoDB
-  mongo:
-    image: mongo:5
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-    volumes:
-      - mongo_data:/data/db
-      - ./databases/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
-    networks:
-      - stock-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 3G
-
-  # Redis
-  redis:
+  test-redis:
     image: redis:6-alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    networks:
-      - stock-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 2G
-
-networks:
-  stock-network:
-    driver: bridge
-
-volumes:
-  postgres_data:
-  mongo_data:
-  redis_data:
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
