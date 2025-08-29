@@ -1,0 +1,31 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: market-data-service
+    url: http://market-data:3001
+    routes:
+      - name: market-data-route
+        paths:
+          - /market-data
+
+  - name: financial-analysis-service
+    url: http://financial-analysis:3002
+    routes:
+      - name: financial-analysis-route
+        paths:
+          - /financial-analysis
+
+  - name: ai-agent-service
+    url: http://ai-agent:3003
+    routes:
+      - name: ai-agent-route
+        paths:
+          - /ai-agent
+
+  - name: frontend
+    url: http://frontend:3000
+    routes:
+      - name: frontend-route
+        paths:
+          - /
